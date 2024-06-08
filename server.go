@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http/httputil"
 	"net/url"
 	"sync"
 )
@@ -8,6 +9,10 @@ import (
 type Server struct {
 	URL               *url.URL
 	ActiveConnections int
-	Mutex             sync.Sync
+	Mutex             sync.Mutex
 	Healthy           bool
+}
+
+func (s *Server) Proxy() *httputil.ReverseProxy {
+	return httputil.NewSingleHostReverseProxy(s.URL)
 }
