@@ -16,3 +16,18 @@ type Server struct {
 func (s *Server) Proxy() *httputil.ReverseProxy {
 	return httputil.NewSingleHostReverseProxy(s.URL)
 }
+
+func nextServerLeastActive(servers []*Server) *Server {
+	leastActiveConnections := -1
+	leastActiveServer := servers[0]
+	for _, server := range servers {
+		server.Mutex.Lock()
+		if (server.ActiveConnections < leastActiveConnections || leastActiveConnections == -1) && server.Healthy {
+			leastActiveConnections = server.ActiveConnections
+			leastActiveServer = server
+		}
+		server.Mutex.Unlock()
+	}
+
+	return leastActiveServer
+}
